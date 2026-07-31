@@ -1,0 +1,95 @@
+@import "tailwindcss";
+
+@theme {
+  /* ============================================================
+     SÖZTEK Bilişim — Marka Renkleri
+     Ana vurgu: Turuncu (#F78F1E) • Yapısal koyu: Antrasit
+     Zemin: Açık gri / Beyaz  (oksid / soztekbilgisayar teması)
+     Not: Kod tabanı boyunca "green-*" sınıfları yapısal KOYU
+     (antrasit) rol için yeniden tanımlanmıştır; "orange-*" vurgu.
+     ============================================================ */
+
+  /* Yapısal koyu (header bandı, footer, hero, linkler) — antrasit/slate */
+  --color-green-50: #f4f6f8;
+  --color-green-100: #e6eaef;
+  --color-green-200: #d2d9e0;
+  --color-green-300: #a3adb9;
+  --color-green-400: #6b7684;
+  --color-green-500: #4a5560;
+  --color-green-600: #363f49;
+  --color-green-700: #2a323b;
+  --color-green-800: #1f262e;
+  --color-green-900: #171c22;
+
+  /* Vurgu — turuncu (#F78F1E) */
+  --color-orange-50: #fff6ea;
+  --color-orange-100: #ffe9cc;
+  --color-orange-200: #ffd399;
+  --color-orange-300: #fdb75f;
+  --color-orange-400: #f99f33;
+  --color-orange-500: #f78f1e;
+  --color-orange-600: #e07a0c;
+  --color-orange-700: #b9610a;
+
+  --color-cream: #f4f5f7;
+  --color-ink: #2a2f36;
+
+  --font-sans: var(--font-sans), system-ui, -apple-system, sans-serif;
+
+  --radius-xl: 0.9rem;
+  --radius-2xl: 1.1rem;
+}
+
+:root {
+  --background: var(--color-cream);
+  --foreground: var(--color-ink);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Yumuşak gölge yardımcıları */
+.card-shadow {
+  box-shadow: 0 1px 2px rgba(20, 25, 32, 0.05), 0 8px 24px -14px rgba(20, 25, 32, 0.22);
+}
+
+.hover-lift {
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 34px -14px rgba(20, 25, 32, 0.32);
+}
+
+/* İnce kaydırma çubuğu */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.animate-marquee {
+  animation: marquee 26s linear infinite;
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up {
+  animation: fade-up 0.5s ease both;
+}
