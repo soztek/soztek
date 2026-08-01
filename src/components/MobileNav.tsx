@@ -9,6 +9,7 @@ interface NavCat {
   name: string;
   slug: string;
   emoji?: string | null;
+  children?: { name: string; slug: string }[];
 }
 
 export function MobileNav({
@@ -49,14 +50,29 @@ export function MobileNav({
             Anasayfa
           </Link>
           {categories.map((c) => (
-            <Link
-              key={c.slug}
-              href={`/kategori/${c.slug}`}
-              onClick={() => setOpen(false)}
-              className="flex items-center gap-2 rounded-lg px-3 py-2.5 font-medium text-ink hover:bg-green-50"
-            >
-              <span>{c.emoji}</span> {c.name}
-            </Link>
+            <div key={c.slug}>
+              <Link
+                href={`/kategori/${c.slug}`}
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2 rounded-lg px-3 py-2.5 font-medium text-ink hover:bg-green-50"
+              >
+                <span>{c.emoji}</span> {c.name}
+              </Link>
+              {c.children && c.children.length > 0 && (
+                <div className="ml-6 space-y-0.5 border-l-2 border-green-100 pl-2">
+                  {c.children.map((ch) => (
+                    <Link
+                      key={ch.slug}
+                      href={`/kategori/${ch.slug}`}
+                      onClick={() => setOpen(false)}
+                      className="block rounded-lg px-3 py-2 text-sm text-ink/70 hover:bg-green-50 hover:text-orange-600"
+                    >
+                      {ch.name}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
           ))}
           <Link href="/hakkimizda" onClick={() => setOpen(false)} className="block rounded-lg px-3 py-2.5 font-medium text-ink hover:bg-green-50">
             Hakkımızda

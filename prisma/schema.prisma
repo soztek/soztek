@@ -17,6 +17,13 @@ model Category {
   isActive  Boolean   @default(true)
   products  Product[]
   createdAt DateTime  @default(now())
+
+  // Alt kategori ağacı (self-relation)
+  parentId  String?
+  parent    Category?  @relation("CategoryTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children  Category[] @relation("CategoryTree")
+
+  @@index([parentId])
 }
 
 model Product {

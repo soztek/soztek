@@ -102,14 +102,17 @@ export async function saveCategory(formData: FormData) {
   if (!name) throw new Error("Kategori adı zorunlu");
   const emoji = String(formData.get("emoji") || "") || null;
   const order = Number(formData.get("order") || 0);
+  let parentId = String(formData.get("parentId") || "") || null;
+  // Kendini üst kategori seçmesini engelle
+  if (parentId && parentId === id) parentId = null;
 
   if (id) {
-    await prisma.category.update({ where: { id }, data: { name, emoji, order } });
+    await prisma.category.update({ where: { id }, data: { name, emoji, order, parentId } });
   } else {
     let slug = slugify(name);
     let n = 1;
     while (await prisma.category.findUnique({ where: { slug } })) slug = `${slugify(name)}-${++n}`;
-    await prisma.category.create({ data: { name, slug, emoji, order } });
+    await prisma.category.create({ data: { name, slug, emoji, order, parentId } });
   }
   revalidatePath("/admin/kategoriler");
   revalidatePath("/");

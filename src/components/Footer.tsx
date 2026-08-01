@@ -8,7 +8,7 @@ export async function Footer() {
   const [settings, categories] = await Promise.all([
     getSettings(),
     prisma.category.findMany({
-      where: { isActive: true },
+      where: { isActive: true, parentId: null },
       orderBy: { order: "asc" },
       select: { name: true, slug: true },
     }),

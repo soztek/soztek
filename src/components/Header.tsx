@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Phone, User, Truck, ShieldCheck, Headset } from "lucide-react";
+import { Phone, User, Truck, ShieldCheck, Headset, ChevronDown } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/settings";
 import { getCurrentUser } from "@/lib/user-auth";
@@ -12,9 +12,18 @@ export async function Header() {
   const [settings, categories, user] = await Promise.all([
     getSettings(),
     prisma.category.findMany({
-      where: { isActive: true },
+      where: { isActive: true, parentId: null },
       orderBy: { order: "asc" },
-      select: { name: true, slug: true, emoji: true },
+      select: {
+        name: true,
+        slug: true,
+        emoji: true,
+        children: {
+          where: { isActive: true },
+          orderBy: { order: "asc" },
+          select: { name: true, slug: true },
+        },
+      },
     }),
     getCurrentUser(),
   ]);
@@ -69,18 +78,36 @@ export async function Header() {
           </div>
         </div>
 
-        {/* Kategori menüsü — ikonlu çubuk (masaüstü) */}
+        {/* Kategori menüsü — ikonlu çubuk + alt kategori açılır menüsü (masaüstü) */}
         <nav className="hidden border-t border-green-100 bg-white lg:block">
           <div className="mx-auto flex max-w-7xl items-stretch justify-center">
             {categories.map((c) => (
-              <Link
-                key={c.slug}
-                href={`/kategori/${c.slug}`}
-                className="group flex flex-1 flex-col items-center gap-2 border-l border-green-100 px-2 py-3.5 transition first:border-l-0 hover:bg-green-50"
-              >
-                <CategoryIcon slug={c.slug} className="h-6 w-6 text-ink/60 transition group-hover:text-orange-500" />
-                <span className="text-center text-[13px] font-semibold text-ink group-hover:text-orange-600">{c.name}</span>
-              </Link>
+              <div key={c.slug} className="group relative flex flex-1">
+                <Link
+                  href={`/kategori/${c.slug}`}
+                  className="flex w-full flex-col items-center gap-2 border-l border-green-100 px-2 py-3.5 transition group-first:border-l-0 group-hover:bg-green-50"
+                >
+                  <CategoryIcon slug={c.slug} className="h-6 w-6 text-ink/60 transition group-hover:text-orange-500" />
+                  <span className="flex items-center gap-1 text-center text-[13px] font-semibold text-ink group-hover:text-orange-600">
+                    {c.name}
+                    {c.children.length > 0 && <ChevronDown size={12} className="text-ink/40" />}
+                  </span>
+                </Link>
+                {/* Alt kategori açılır menüsü */}
+                {c.children.length > 0 && (
+                  <div className="invisible absolute left-1/2 top-full z-50 min-w-52 -translate-x-1/2 rounded-xl border border-green-100 bg-white p-2 opacity-0 shadow-xl transition-all group-hover:visible group-hover:opacity-100">
+                    {c.children.map((ch) => (
+                      <Link
+                        key={ch.slug}
+                        href={`/kategori/${ch.slug}`}
+                        className="block rounded-lg px-3 py-2 text-sm font-medium text-ink hover:bg-green-50 hover:text-orange-600"
+                      >
+                        {ch.name}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         </nav>

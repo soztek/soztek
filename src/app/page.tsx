@@ -12,9 +12,12 @@ export default async function HomePage() {
   const [settings, categories, discounted, featured, brands] = await Promise.all([
     getSettings(),
     prisma.category.findMany({
-      where: { isActive: true },
+      where: { isActive: true, parentId: null },
       orderBy: { order: "asc" },
-      include: { _count: { select: { products: true } } },
+      include: {
+        _count: { select: { products: true } },
+        children: { where: { isActive: true }, select: { _count: { select: { products: true } } } },
+      },
     }),
     prisma.product.findMany({
       where: { isActive: true, compareAt: { not: null } },
@@ -40,6 +43,9 @@ export default async function HomePage() {
 
   return (
     <>
+      {/* ÜRÜN ARAMA — kategori çubuğu ile hero arasında */}
+      <SearchSection />
+
       {/* HERO */}
       <section className="relative overflow-hidden bg-gradient-to-br from-green-800 via-green-700 to-green-900 text-white">
         <div className="absolute -right-16 -top-16 h-72 w-72 rounded-full bg-orange-500/20 blur-3xl" />
@@ -80,7 +86,9 @@ export default async function HomePage() {
                   <CategoryIcon slug={c.slug} className="h-9 w-9 text-orange-400" />
                   <div>
                     <p className="font-bold">{c.name}</p>
-                    <p className="text-sm text-green-100/70">{c._count.products} ürün</p>
+                    <p className="text-sm text-green-100/70">
+                      {c._count.products + c.children.reduce((s, ch) => s + ch._count.products, 0)} ürün
+                    </p>
                   </div>
                 </Link>
               ))}
@@ -88,9 +96,6 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* ÜRÜN ARAMA */}
-      <SearchSection />
 
       {/* GÜVEN ŞERİDİ */}
       <section className="border-b border-green-100 bg-white">
@@ -127,7 +132,9 @@ export default async function HomePage() {
               </span>
               <div>
                 <p className="text-sm font-bold text-ink group-hover:text-orange-600">{c.name}</p>
-                <p className="text-xs text-ink/50">{c._count.products} ürün</p>
+                <p className="text-xs text-ink/50">
+                  {c._count.products + c.children.reduce((s, ch) => s + ch._count.products, 0)} ürün
+                </p>
               </div>
             </Link>
           ))}
