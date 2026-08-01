@@ -6,6 +6,7 @@ import { toProductDTO } from "@/lib/serialize";
 import { ProductCard } from "@/components/ProductCard";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { Reviews } from "@/components/Reviews";
+import { SearchSection } from "@/components/SearchSection";
 
 export default async function HomePage() {
   const [settings, categories, discounted, featured, brands] = await Promise.all([
@@ -87,6 +88,9 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ÜRÜN ARAMA */}
+      <SearchSection />
 
       {/* GÜVEN ŞERİDİ */}
       <section className="border-b border-green-100 bg-white">
