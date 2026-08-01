@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Phone, User, Truck, ShieldCheck, Headset, ChevronDown } from "lucide-react";
+import { MessageCircle, User, Truck, ShieldCheck, Headset, ChevronDown } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/settings";
 import { getCurrentUser } from "@/lib/user-auth";
@@ -27,6 +27,10 @@ export async function Header() {
     }),
     getCurrentUser(),
   ]);
+
+  // WhatsApp numarasını yerel biçime çevir: 905457698352 -> 0545 769 83 52
+  const waDisplay = (settings.whatsapp.startsWith("90") ? "0" + settings.whatsapp.slice(2) : settings.whatsapp)
+    .replace(/(\d{4})(\d{3})(\d{2})(\d{2})/, "$1 $2 $3 $4");
 
   return (
     <>
@@ -64,8 +68,13 @@ export async function Header() {
           </nav>
 
           <div className="ml-auto flex items-center gap-2 sm:gap-3 lg:ml-0">
-            <a href={`tel:${settings.phone.replace(/\s/g, "")}`} className="hidden items-center gap-2 rounded-lg border border-green-200 px-4 py-2 text-sm font-semibold text-green-700 hover:border-orange-400 hover:text-orange-600 md:flex">
-              <Phone size={16} /> {settings.phone}
+            <a
+              href={`https://wa.me/${settings.whatsapp}`}
+              target="_blank"
+              rel="noreferrer"
+              className="hidden items-center gap-2 rounded-lg border border-green-200 px-4 py-2 text-sm font-semibold text-green-700 hover:border-orange-400 hover:text-orange-600 md:flex"
+            >
+              <MessageCircle size={16} /> {waDisplay}
             </a>
             <Link
               href={user ? "/hesabim" : "/giris"}
