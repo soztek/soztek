@@ -63,6 +63,20 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Sepetteki ürünler bulunamadı" }, { status: 400 });
   }
 
+  // Stok kontrolü — tükenmiş veya yetersiz stoklu ürün varsa sipariş oluşturma.
+  const stockIssue = lines.find((l) => l.product.stock < l.qty);
+  if (stockIssue) {
+    const p = stockIssue.product;
+    const msg =
+      p.stock <= 0
+        ? `"${p.name}" ürünü şu anda stokta bulunmuyor. Lütfen sepetinizden çıkarın.`
+        : `"${p.name}" ürününden en fazla ${p.stock} adet sipariş verebilirsiniz.`;
+    return NextResponse.json(
+      { error: msg, code: "OUT_OF_STOCK", productId: p.id, available: p.stock },
+      { status: 409 }
+    );
+  }
+
   const currentUser = await getCurrentUser();
   const settings = await getSettings();
   const subtotal = lines.reduce((s, l) => s + l.lineTotal, 0);
