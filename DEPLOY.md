@@ -1,49 +1,59 @@
-# SÜT-HÜM — Vercel Yayına Alma Rehberi
+# SÖZTEK — Yayına Alma (Vercel + Neon)
 
-Site kodu Vercel'e hazır: production build hatasız derleniyor, tüm sayfalar dinamik,
-fotoğraf yükleme Vercel Blob'a uyumlu, Prisma build'e dahil.
+## 1) GitHub reposu
+Boş bir repo oluştur (README/gitignore/lisans **ekleme**): https://github.com/new
+- Repo adı: `soztek`
+- Sonra bu klasörde:
+  ```bash
+  git remote add origin https://github.com/<KULLANICI>/soztek.git
+  git push -u origin main
+  ```
 
-## Adım 1 — Kodu GitHub'a gönder
-1. https://github.com/new adresinde **boş** bir repo oluştur (ad: `suthum`, README ekleme).
-2. Proje klasöründe (terminalde) şunu çalıştır (`<kullanici>` yerine GitHub kullanıcı adın):
+## 2) Vercel projesi
+- vercel.com → Add New → Project → GitHub'dan `soztek` reposunu import et.
+- Framework otomatik: **Next.js**. Build ayarına dokunma (`prisma generate && next build` zaten package.json'da).
+- İlk deploy DB olmadan **build alır** ama çalışma anında hata verir; DB + env eklenince düzelir.
 
+## 3) Veritabanı — Neon (Vercel Storage)
+- Proje → **Storage** → **Create Database** → **Neon (Postgres)** → oluştur.
+- Bu, `DATABASE_URL` env değişkenini **otomatik** ekler.
+
+## 4) Environment Variables (Project → Settings → Environment Variables)
+Aşağıdakileri **Production** (ve istersen Preview) için ekle:
+
+| Key | Value |
+|-----|-------|
+| `AUTH_SECRET` | `11124373cf26e99930e9af160e0e77ed461e2aa8bc82223cd7a4b8ba2adbea64` |
+| `ADMIN_EMAIL` | `admin@soztekbilgisayar.com.tr` |
+| `ADMIN_PASSWORD` | *(güçlü bir şifre belirle)* |
+| `NEXT_PUBLIC_BASE_URL` | `https://<vercel-adresin>.vercel.app` (sonra domain) |
+| `IYZICO_API_KEY` | *(boş = demo mod; canlı için iyzico'dan)* |
+| `IYZICO_SECRET_KEY` | *(boş = demo mod)* |
+| `IYZICO_BASE_URL` | `https://api.iyzipay.com` (canlı) / `https://sandbox-api.iyzipay.com` (test) |
+
+`DATABASE_URL` → Neon entegrasyonundan otomatik gelir, elle ekleme.
+
+## 5) Şema + demo veriyi Neon'a yükleme (yerelden, tek sefer)
+Neon panosundan **connection string**'i al (pooler değil, **direct/unpooled** olan; host'ta `-pooler` yoksa odur). Sonra bu klasörde geçici olarak:
 ```bash
-git remote add origin https://github.com/<kullanici>/suthum.git
-git branch -M main
-git push -u origin main
+# PowerShell:
+$env:DATABASE_URL = "postgresql://...neon.tech/...?sslmode=require"
+npx prisma db push
+npx tsx prisma/seed.ts
 ```
-İlk push'ta tarayıcı GitHub girişi açılır (Git Credential Manager) — onayla.
+(Bu adımı Neon URL'sini verince ben de yapabilirim.)
 
-## Adım 2 — Vercel'de projeyi içe aktar
-1. https://vercel.com → **Add New… → Project** → `suthum` reposunu **Import** et.
-2. Framework otomatik **Next.js** algılanır. Henüz **Deploy'a basma**, önce depolama ekle.
+## 6) Redeploy
+Env'ler eklendikten sonra Vercel → Deployments → son deploy → **Redeploy**. Site canlı.
 
-## Adım 3 — Depolama ekle (Storage sekmesi)
-1. **Postgres** (Neon) oluştur → `DATABASE_URL` otomatik eklenir.
-2. **Blob** oluştur → `BLOB_READ_WRITE_TOKEN` otomatik eklenir.
+## Sonraki
+- Ürün görselleri: panel `/admin` üzerinden yüklenir. Vercel'de kalıcı depolama için **Vercel Blob** (public depo) gerekir; yoksa yerel disk (Vercel'de kalıcı değil). Blob token'ı env'e eklenir.
+- Domain: `soztek.com.tr` → Vercel → Settings → Domains.
+- iyzico canlı anahtar → gerçek tahsilat.
 
-## Adım 4 — Ortam değişkenlerini (Environment Variables) ekle
-| Değişken | Değer |
-|---|---|
-| `AUTH_SECRET` | `6cf4cc48a429df3a77c1687d712a6d21bb06ebb829a594526a8a1d79b48f9037` |
-| `ADMIN_EMAIL` | `admin@suthum.com` (istediğin e-posta) |
-| `ADMIN_PASSWORD` | güçlü bir şifre belirle |
-| `NEXT_PUBLIC_BASE_URL` | ilk deploy sonrası verilen adres (ör. `https://suthum.vercel.app`) |
-| `IYZICO_BASE_URL` | `https://sandbox-api.iyzipay.com` |
-
-> `DATABASE_URL` ve `BLOB_READ_WRITE_TOKEN` Adım 3'te otomatik gelir.
-> iyzico gerçek ödeme anahtarları (`IYZICO_API_KEY`, `IYZICO_SECRET_KEY`) sonradan eklenir;
-> boş kalırsa site DEMO ödeme modunda çalışır.
-
-## Adım 5 — Deploy
-**Deploy**'a bas. Build tamamlanınca `.vercel.app` adresi verilir.
-`NEXT_PUBLIC_BASE_URL`'i bu adresle güncelleyip yeniden deploy et.
-
-## Adım 6 — Veritabanı şeması + örnek veri
-Neon `DATABASE_URL`'ini Vercel Storage sekmesinden kopyala ve bana ver;
-şemayı uygular ve örnek Ardahan ürünlerini yüklerim. (Ya da yerelde:
-`DATABASE_URL="<neon-url>" npx prisma db push` ve `npx tsx prisma/seed.ts`.)
-
-## Adım 7 — (Sonra) Alan adı ve ödeme
-- `suthum.com`'u Vercel'e yönlendir (mevcut WordPress siteyi değiştirir — hazır olunca).
-- iyzico canlı anahtarlarını ekle → gerçek ödemeye geç.
+## Yerel geliştirme
+```bash
+# Node PATH'e:  $env:Path = "C:\Program Files\nodejs;" + $env:Path
+npm run dev   # http://localhost:3000
+# Admin: /admin/login
+```
