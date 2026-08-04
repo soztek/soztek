@@ -7,6 +7,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { getSettings } from "@/lib/settings";
 import { toNumber } from "@/lib/utils";
+import { SITE_URL, SITE_NAME, LEGAL_NAME } from "@/lib/seo";
 
 // Site tamamen veritabanından beslendiği için tüm sayfalar dinamik render edilir.
 // (Vercel build sırasında DB'ye ihtiyaç duyulmaz.)
@@ -18,14 +19,32 @@ const manrope = Manrope({
   display: "swap",
 });
 
+const TITLE = "SÖZTEK Bilişim — Bilgisayar, Donanım ve Teknoloji Ürünleri";
+const DESC =
+  "Bilgisayar, notebook, ekran kartı, anakart, çevre birimleri, ağ ve güvenlik ürünleri. Kurumsal ve bireysel bilişim çözümleri; uygun fiyat, hızlı kargo ve güvenli ödeme.";
+
 export const metadata: Metadata = {
-  title: {
-    default: "SÖZTEK Bilişim — Bilgisayar, Donanım ve Teknoloji Ürünleri",
-    template: "%s | SÖZTEK Bilişim",
+  metadataBase: new URL(SITE_URL),
+  title: { default: TITLE, template: "%s | SÖZTEK Bilişim" },
+  description: DESC,
+  keywords: ["bilgisayar", "notebook", "ekran kartı", "anakart", "donanım", "çevre birimleri", "ağ ürünleri", "güvenlik kamerası", "monitör", "toner", "soztek", "bilişim", "Soma", "Manisa"],
+  alternates: { canonical: "/" },
+  robots: { index: true, follow: true },
+  openGraph: {
+    type: "website",
+    locale: "tr_TR",
+    url: SITE_URL,
+    siteName: SITE_NAME,
+    title: TITLE,
+    description: DESC,
+    images: [{ url: "/logo.png", width: 819, height: 251, alt: SITE_NAME }],
   },
-  description:
-    "Bilgisayar, notebook, ekran kartı, anakart, çevre birimleri, ağ ve güvenlik ürünleri. Kurumsal ve bireysel bilişim çözümleri; uygun fiyat, hızlı kargo ve güvenli ödeme.",
-  keywords: ["bilgisayar", "notebook", "ekran kartı", "anakart", "donanım", "çevre birimleri", "ağ ürünleri", "güvenlik kamerası", "soztek", "bilişim"],
+  twitter: {
+    card: "summary",
+    title: TITLE,
+    description: DESC,
+    images: ["/logo.png"],
+  },
 };
 
 export default async function RootLayout({
@@ -34,9 +53,43 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const settings = await getSettings();
+
+  const orgJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Store",
+    name: LEGAL_NAME,
+    alternateName: SITE_NAME,
+    url: SITE_URL,
+    logo: `${SITE_URL}/logo.png`,
+    image: `${SITE_URL}/logo.png`,
+    email: settings.email,
+    telephone: settings.phone,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: "Namazgah Mah. Nazım Usluoğlu Cad. No:45",
+      addressLocality: "Soma",
+      addressRegion: "Manisa",
+      addressCountry: "TR",
+    },
+    sameAs: settings.instagram ? [`https://instagram.com/${settings.instagram}`] : undefined,
+  };
+  const siteJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: SITE_NAME,
+    url: SITE_URL,
+    potentialAction: {
+      "@type": "SearchAction",
+      target: `${SITE_URL}/arama?q={search_term_string}`,
+      "query-input": "required name=search_term_string",
+    },
+  };
+
   return (
     <html lang="tr" className={`${manrope.variable} antialiased`}>
       <body className="flex min-h-full flex-col">
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(siteJsonLd) }} />
         <CartProvider>
           <Header />
           <main className="min-h-[60vh] flex-1">{children}</main>

@@ -8,6 +8,7 @@ import { ProductImage } from "@/components/ProductImage";
 import { ProductCard } from "@/components/ProductCard";
 import { AddToCartButton } from "@/components/cart/AddToCartButton";
 import { formatPrice, discountPercent } from "@/lib/utils";
+import { SITE_URL, SITE_NAME, abs } from "@/lib/seo";
 
 export async function generateMetadata({
   params,
@@ -15,10 +16,29 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const product = await prisma.product.findUnique({ where: { slug } });
+  const product = await prisma.product.findUnique({ where: { slug }, include: { category: true } });
+  if (!product) return { title: "Ürün" };
+  const desc =
+    product.description ||
+    `${product.name}${product.brand ? ` — ${product.brand}` : ""}. SÖZTEK Bilgisayar'da uygun fiyat, hızlı kargo ve güvenli ödeme.`;
+  const path = `/urun/${product.slug}`;
   return {
-    title: product?.name ?? "Ürün",
-    description: product?.description ?? undefined,
+    title: product.name,
+    description: desc.slice(0, 160),
+    alternates: { canonical: path },
+    openGraph: {
+      type: "website",
+      url: abs(path),
+      title: product.name,
+      description: desc.slice(0, 160),
+      images: product.imageUrl ? [{ url: product.imageUrl }] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: product.name,
+      description: desc.slice(0, 160),
+      images: product.imageUrl ? [product.imageUrl] : undefined,
+    },
   };
 }
 
@@ -48,8 +68,43 @@ export default async function ProductPage({
     take: 4,
   });
 
+  const path = `/urun/${product.slug}`;
+  const isUsed = product.category.slug === "ikinci-el";
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    image: dto.images.length ? dto.images : dto.imageUrl ? [dto.imageUrl] : undefined,
+    description: product.description || product.name,
+    sku: product.sku || undefined,
+    ...(product.brand ? { brand: { "@type": "Brand", name: product.brand } } : {}),
+    ...(dto.reviewCount > 0
+      ? { aggregateRating: { "@type": "AggregateRating", ratingValue: dto.rating, reviewCount: dto.reviewCount } }
+      : {}),
+    offers: {
+      "@type": "Offer",
+      priceCurrency: "TRY",
+      price: dto.price.toFixed(2),
+      availability: dto.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      itemCondition: isUsed ? "https://schema.org/UsedCondition" : "https://schema.org/NewCondition",
+      url: abs(path),
+      seller: { "@type": "Organization", name: SITE_NAME },
+    },
+  };
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Anasayfa", item: SITE_URL },
+      { "@type": "ListItem", position: 2, name: product.category.name, item: abs(`/kategori/${product.category.slug}`) },
+      { "@type": "ListItem", position: 3, name: product.name, item: abs(path) },
+    ],
+  };
+
   return (
     <div className="mx-auto max-w-7xl px-6 py-8">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <nav className="mb-6 flex flex-wrap items-center gap-2 text-sm text-ink/50">
         <Link href="/" className="hover:text-green-700">Anasayfa</Link>
         <span>/</span>

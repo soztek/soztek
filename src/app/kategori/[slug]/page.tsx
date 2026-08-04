@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { toProductDTO } from "@/lib/serialize";
 import { ProductCard } from "@/components/ProductCard";
 import { CategoryIcon } from "@/components/CategoryIcon";
+import { SITE_URL, abs } from "@/lib/seo";
 
 export async function generateMetadata({
   params,
@@ -13,7 +14,15 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const category = await prisma.category.findUnique({ where: { slug } });
-  return { title: category?.name ?? "Kategori" };
+  if (!category) return { title: "Kategori" };
+  const desc = `${category.name} ürünleri en uygun fiyatlarla SÖZTEK Bilgisayar'da. Hızlı kargo, güvenli ödeme ve taksit imkânı.`;
+  const path = `/kategori/${category.slug}`;
+  return {
+    title: category.name,
+    description: desc,
+    alternates: { canonical: path },
+    openGraph: { type: "website", url: abs(path), title: category.name, description: desc },
+  };
 }
 
 export default async function CategoryPage({
@@ -63,8 +72,20 @@ export default async function CategoryPage({
 
   const activeTop = category.parent?.slug ?? slug;
 
+  const crumbs = [
+    { name: "Anasayfa", url: SITE_URL },
+    ...(category.parent ? [{ name: category.parent.name, url: abs(`/kategori/${category.parent.slug}`) }] : []),
+    { name: category.name, url: abs(`/kategori/${category.slug}`) },
+  ];
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: crumbs.map((c, i) => ({ "@type": "ListItem", position: i + 1, name: c.name, item: c.url })),
+  };
+
   return (
     <div className="mx-auto max-w-7xl px-6 py-8">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       {/* Başlık / breadcrumb */}
       <nav className="mb-6 flex flex-wrap items-center gap-2 text-sm text-ink/50">
         <Link href="/" className="hover:text-orange-600">Anasayfa</Link>
