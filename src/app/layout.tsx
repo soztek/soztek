@@ -30,6 +30,7 @@ export const metadata: Metadata = {
   keywords: ["bilgisayar", "notebook", "ekran kartı", "anakart", "donanım", "çevre birimleri", "ağ ürünleri", "güvenlik kamerası", "monitör", "toner", "soztek", "bilişim", "Soma", "Manisa"],
   alternates: { canonical: "/" },
   robots: { index: true, follow: true },
+  verification: { google: "Tr56SnFH1LcuDtR5YEN5-BmWbcMoCATdrzK5JhI_N4c" },
   openGraph: {
     type: "website",
     locale: "tr_TR",
