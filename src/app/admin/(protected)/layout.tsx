@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { LayoutDashboard, Package, FolderTree, ShoppingCart, Users, Settings, LogOut, ExternalLink } from "lucide-react";
+import { LayoutDashboard, Package, FolderTree, ShoppingCart, Users, Settings, LogOut, ExternalLink, FileDown } from "lucide-react";
 import { isAuthed } from "@/lib/auth";
 import { logoutAction } from "@/lib/admin-actions";
 
@@ -8,6 +8,7 @@ const NAV = [
   { href: "/admin", label: "Panel", icon: LayoutDashboard },
   { href: "/admin/urunler", label: "Ürünler", icon: Package },
   { href: "/admin/kategoriler", label: "Kategoriler", icon: FolderTree },
+  { href: "/admin/dosyalar", label: "Dosyalar", icon: FileDown },
   { href: "/admin/siparisler", label: "Siparişler", icon: ShoppingCart },
   { href: "/admin/uyeler", label: "Üyeler", icon: Users },
   { href: "/admin/ayarlar", label: "Ayarlar", icon: Settings },

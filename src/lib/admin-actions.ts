@@ -126,6 +126,44 @@ export async function deleteCategory(formData: FormData) {
   revalidatePath("/");
 }
 
+// --- İndirilebilir Dosyalar ---
+export async function saveDownloadFile(formData: FormData) {
+  await guard();
+  const id = String(formData.get("id") || "");
+  const name = String(formData.get("name") || "").trim();
+  if (!name) throw new Error("Dosya adı zorunlu");
+
+  const data = {
+    name,
+    description: String(formData.get("description") || "") || null,
+    category: String(formData.get("category") || "") || null,
+    fileUrl: String(formData.get("fileUrl") || "") || null,
+    linkUrl: String(formData.get("linkUrl") || "") || null,
+    fileSize: formData.get("fileSize") ? Number(formData.get("fileSize")) : null,
+    version: String(formData.get("version") || "") || null,
+    order: Number(formData.get("order") || 0),
+    isActive: formData.get("isActive") !== "off",
+  };
+  if (!data.fileUrl && !data.linkUrl) throw new Error("Dosya yükleyin veya bir link girin");
+
+  if (id) {
+    await prisma.downloadFile.update({ where: { id }, data });
+  } else {
+    await prisma.downloadFile.create({ data });
+  }
+  revalidatePath("/admin/dosyalar");
+  revalidatePath("/dosyalar");
+  redirect("/admin/dosyalar?ok=1");
+}
+
+export async function deleteDownloadFile(formData: FormData) {
+  await guard();
+  const id = String(formData.get("id") || "");
+  if (id) await prisma.downloadFile.delete({ where: { id } });
+  revalidatePath("/admin/dosyalar");
+  revalidatePath("/dosyalar");
+}
+
 // --- Siparişler ---
 export async function updateOrderStatus(formData: FormData) {
   await guard();

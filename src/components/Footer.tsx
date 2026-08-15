@@ -78,6 +78,7 @@ export async function Footer() {
           <h4 className="mb-3 font-semibold text-white">Kurumsal</h4>
           <ul className="space-y-2 text-sm text-green-300">
             <li><Link href="/hakkimizda" className="hover:text-orange-400">Hakkımızda</Link></li>
+            <li><Link href="/dosyalar" className="hover:text-orange-400">Dosyalar</Link></li>
             <li><Link href="/iletisim" className="hover:text-orange-400">İletişim</Link></li>
             <li><Link href="/mesafeli-satis" className="hover:text-orange-400">Mesafeli Satış Sözleşmesi</Link></li>
             <li><Link href="/gizlilik" className="hover:text-orange-400">Gizlilik & KVKK</Link></li>

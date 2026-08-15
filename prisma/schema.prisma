@@ -133,6 +133,23 @@ model Setting {
   updatedAt         DateTime @updatedAt
 }
 
+// İndirilebilir dosyalar (sürücü, yazılım, yazıcı kurulum vb.)
+model DownloadFile {
+  id          String   @id @default(cuid())
+  name        String
+  description String?  @db.Text
+  category    String? // "Yazıcı Sürücüleri", "Anakart", "Ekran Kartı" ...
+  fileUrl     String? // Blob'a yüklenen dosya adresi
+  linkUrl     String? // dış link (üretici indirme sayfası)
+  fileSize    Int? // bayt
+  version     String?
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  @@index([category])
+}
+
 enum OrderStatus {
   PENDING
   PREPARING
