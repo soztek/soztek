@@ -7,6 +7,7 @@ import { CartButton } from "./cart/CartButton";
 import { MobileNav } from "./MobileNav";
 import { CategoryIcon } from "./CategoryIcon";
 import { Logo } from "./Logo";
+import { HeaderSearch } from "./HeaderSearch";
 
 export async function Header() {
   const [settings, categories, user] = await Promise.all([
@@ -59,13 +60,10 @@ export async function Header() {
             <Logo variant="dark" />
           </Link>
 
-          {/* Orta menü (masaüstü) */}
-          <nav className="hidden flex-1 items-center justify-center gap-9 lg:flex">
-            <Link href="/" className="text-[15px] font-semibold text-ink transition hover:text-orange-600">Anasayfa</Link>
-            <Link href="/#kategoriler" className="text-[15px] font-semibold text-ink transition hover:text-orange-600">Ürünler</Link>
-            <Link href="/hakkimizda" className="text-[15px] font-semibold text-ink transition hover:text-orange-600">Hakkımızda</Link>
-            <Link href="/iletisim" className="text-[15px] font-semibold text-ink transition hover:text-orange-600">İletişim</Link>
-          </nav>
+          {/* Orta: canlı arama (masaüstü) */}
+          <div className="hidden flex-1 justify-center px-4 lg:flex">
+            <HeaderSearch />
+          </div>
 
           <div className="ml-auto flex items-center gap-2 sm:gap-3 lg:ml-0">
             <a
