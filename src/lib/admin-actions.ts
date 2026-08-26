@@ -44,6 +44,13 @@ export async function saveProduct(formData: FormData) {
   const baseSlug = slugify(name);
   const price = dec(formData.get("price")) ?? new Prisma.Decimal(0);
 
+  // Galeri görselleri (ilk görsel = ana görsel)
+  const images = [
+    ...new Set(
+      formData.getAll("images").map((v) => String(v).trim()).filter(Boolean)
+    ),
+  ];
+
   const data = {
     name,
     description: String(formData.get("description") || "") || null,
@@ -52,7 +59,8 @@ export async function saveProduct(formData: FormData) {
     unit: String(formData.get("unit") || "") || null,
     brand: String(formData.get("brand") || "") || null,
     sku: String(formData.get("sku") || "") || null,
-    imageUrl: String(formData.get("imageUrl") || "") || null,
+    imageUrl: images[0] ?? null,
+    images,
     stock: Number(formData.get("stock") || 100),
     isActive: formData.get("isActive") === "on",
     isFeatured: formData.get("isFeatured") === "on",

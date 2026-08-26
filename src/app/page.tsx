@@ -60,7 +60,7 @@ export default async function HomePage() {
             </h1>
             <p className="mt-5 max-w-lg text-lg text-green-100/90">{settings.heroSubtitle}</p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="#kategoriler" className="inline-flex items-center gap-2 rounded-lg bg-orange-500 px-7 py-3.5 text-base font-semibold shadow-lg transition hover:bg-orange-600">
+              <Link href="#one-cikan" className="inline-flex items-center gap-2 rounded-lg bg-orange-500 px-7 py-3.5 text-base font-semibold shadow-lg transition hover:bg-orange-600">
                 Ürünleri Keşfet <ArrowRight size={18} />
               </Link>
               <Link href="#one-cikan" className="inline-flex items-center gap-2 rounded-lg bg-white/10 px-7 py-3.5 text-base font-semibold ring-1 ring-white/25 transition hover:bg-white/20">
@@ -113,30 +113,6 @@ export default async function HomePage() {
                 <p className="text-xs text-ink/55">{x.s}</p>
               </div>
             </div>
-          ))}
-        </div>
-      </section>
-
-      {/* KATEGORİLER */}
-      <section id="kategoriler" className="mx-auto max-w-7xl px-6 py-14">
-        <SectionTitle kicker="Ne arıyorsunuz?" title="Kategoriler" />
-        <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-          {categories.map((c) => (
-            <Link
-              key={c.slug}
-              href={`/kategori/${c.slug}`}
-              className="group flex flex-col items-center gap-3 rounded-xl border border-green-100 bg-white p-5 text-center card-shadow hover-lift"
-            >
-              <span className="grid h-16 w-16 place-items-center rounded-full bg-green-50 transition group-hover:bg-orange-50">
-                <CategoryIcon slug={c.slug} className="h-8 w-8 text-green-600 transition group-hover:text-orange-500" />
-              </span>
-              <div>
-                <p className="text-sm font-bold text-ink group-hover:text-orange-600">{c.name}</p>
-                <p className="text-xs text-ink/50">
-                  {c._count.products + c.children.reduce((s, ch) => s + ch._count.products, 0)} ürün
-                </p>
-              </div>
-            </Link>
           ))}
         </div>
       </section>
