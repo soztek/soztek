@@ -126,6 +126,15 @@ export async function saveCategory(formData: FormData) {
   revalidatePath("/");
 }
 
+export async function toggleCategoryActive(formData: FormData) {
+  await guard();
+  const id = String(formData.get("id") || "");
+  const c = await prisma.category.findUnique({ where: { id } });
+  if (c) await prisma.category.update({ where: { id }, data: { isActive: !c.isActive } });
+  revalidatePath("/admin/kategoriler");
+  revalidatePath("/", "layout");
+}
+
 export async function deleteCategory(formData: FormData) {
   await guard();
   const id = String(formData.get("id") || "");

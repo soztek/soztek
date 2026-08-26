@@ -1,6 +1,6 @@
-import { Plus, Save, CornerDownRight } from "lucide-react";
+import { Plus, Save, CornerDownRight, Eye, EyeOff } from "lucide-react";
 import { prisma } from "@/lib/prisma";
-import { saveCategory, deleteCategory } from "@/lib/admin-actions";
+import { saveCategory, deleteCategory, toggleCategoryActive } from "@/lib/admin-actions";
 import { DeleteButton } from "@/components/admin/DeleteButton";
 
 export const dynamic = "force-dynamic";
@@ -28,7 +28,7 @@ export default async function AdminCategories() {
   );
 
   const Row = ({ c, isChild }: { c: (typeof categories)[number]; isChild?: boolean }) => (
-    <div className={`flex flex-wrap items-center gap-3 rounded-xl border border-green-100 bg-white p-3 ${isChild ? "ml-6 border-l-2 border-l-orange-200" : ""}`}>
+    <div className={`flex flex-wrap items-center gap-3 rounded-xl border border-green-100 bg-white p-3 ${isChild ? "ml-6 border-l-2 border-l-orange-200" : ""} ${c.isActive ? "" : "opacity-60"}`}>
       <form action={saveCategory} className="flex flex-1 flex-wrap items-center gap-2">
         <input type="hidden" name="id" value={c.id} />
         {isChild && <CornerDownRight size={16} className="text-orange-400" />}
@@ -39,6 +39,16 @@ export default async function AdminCategories() {
         <span className="text-xs text-ink/40">{c._count.products} ürün</span>
         <button className="inline-flex items-center gap-1.5 rounded-lg border border-green-200 px-3 py-2 text-sm font-semibold text-green-700 hover:bg-green-50">
           <Save size={14} /> Kaydet
+        </button>
+      </form>
+      <form action={toggleCategoryActive}>
+        <input type="hidden" name="id" value={c.id} />
+        <button
+          title={c.isActive ? "Sitede görünüyor — gizlemek için tıkla" : "Gizli — göstermek için tıkla"}
+          className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold ${c.isActive ? "bg-green-100 text-green-700 hover:bg-green-200" : "bg-ink/10 text-ink/50 hover:bg-ink/15"}`}
+        >
+          {c.isActive ? <Eye size={15} /> : <EyeOff size={15} />}
+          {c.isActive ? "Aktif" : "Pasif"}
         </button>
       </form>
       <DeleteButton action={deleteCategory} id={c.id} confirmText={`"${c.name}" kategorisi ve içindeki ${c._count.products} ürün silinecek. Emin misiniz?`} />
