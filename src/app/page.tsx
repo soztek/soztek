@@ -6,7 +6,6 @@ import { toProductDTO } from "@/lib/serialize";
 import { ProductCard } from "@/components/ProductCard";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { Reviews } from "@/components/Reviews";
-import { SearchSection } from "@/components/SearchSection";
 
 export default async function HomePage() {
   const [settings, categories, discounted, featured, brands] = await Promise.all([
@@ -43,9 +42,6 @@ export default async function HomePage() {
 
   return (
     <>
-      {/* ÜRÜN ARAMA — kategori çubuğu ile hero arasında */}
-      <SearchSection />
-
       {/* HERO */}
       <section className="relative overflow-hidden bg-gradient-to-br from-green-800 via-green-700 to-green-900 text-white">
         <div className="absolute -right-16 -top-16 h-72 w-72 rounded-full bg-orange-500/20 blur-3xl" />
