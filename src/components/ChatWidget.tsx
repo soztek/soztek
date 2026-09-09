@@ -89,50 +89,34 @@ export function ChatWidget({
   async function handleText(raw: string) {
     const text = raw.trim();
     if (!text) return;
+    // API'ye gönderilecek geçmiş (yeni mesaj dahil)
+    const apiMsgs = [...msgs, { id: 0, role: "user" as const, text }]
+      .filter((m) => m.text)
+      .map((m) => ({ role: m.role === "user" ? ("user" as const) : ("assistant" as const), content: m.text as string }));
     push({ role: "user", text });
     setInput("");
-    const low = text.toLowerCase();
     setBusy(true);
-
-    // Anahtar kelime → SSS
-    const has = (...k: string[]) => k.some((w) => low.includes(w));
-    if (has("kargo", "teslim", "gönder", "ne zaman gelir")) return finish(() => answerKey("kargo"));
-    if (has("ödeme", "taksit", "kart", "kapıda")) return finish(() => answerKey("odeme"));
-    if (has("garanti", "iade", "değişim", "arıza", "fatura")) return finish(() => answerKey("garanti"));
-    if (has("adres", "nerede", "konum", "mağaza", "dükkan")) return finish(() => answerKey("adres"));
-    if (has("yönetici", "insan", "yetkili", "temsilci", "canlı", "destek", "ara", "telefon", "iletişim")) return finish(() => answerKey("iletisim"));
-    if (has("merhaba", "selam", "iyi günler", "günaydın")) return finish(() => push({ role: "bot", text: "Merhaba! Size nasıl yardımcı olabilirim? Ürün aramak için bir kelime yazabilirsiniz." }));
-
-    // Değilse ürün araması
     try {
-      const res = await fetch(`/api/search?q=${encodeURIComponent(text)}`);
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: apiMsgs }),
+      });
       const data = await res.json();
-      const hits: Hit[] = data.products ?? [];
-      if (hits.length > 0) {
-        push({ role: "bot", text: `"${text}" için ${hits.length} ürün buldum:`, products: hits.slice(0, 5) });
-      } else {
-        push({
-          role: "bot",
-          text: `"${text}" için ürün bulamadım. Dilerseniz sizi yetkili ekibimize bağlayayım — hemen yardımcı olalım.`,
-          whatsapp: true,
-        });
-      }
+      let reply: string = data.reply ?? "Üzgünüm, şu an yardımcı olamıyorum.";
+      const wantsWa = reply.includes("[WHATSAPP]");
+      reply = reply.replace(/\[WHATSAPP\]/g, "").trim();
+      push({
+        role: "bot",
+        text: reply,
+        products: Array.isArray(data.products) && data.products.length ? data.products : undefined,
+        whatsapp: wantsWa,
+      });
     } catch {
-      push({ role: "bot", text: "Bir sorun oluştu. Yetkili ekibimize WhatsApp'tan ulaşabilirsiniz.", whatsapp: true });
+      push({ role: "bot", text: "Bağlantı hatası oluştu. Yetkili ekibimize WhatsApp'tan ulaşabilirsiniz.", whatsapp: true });
     } finally {
       setBusy(false);
     }
-  }
-
-  function finish(fn: () => void) {
-    setTimeout(() => { fn(); setBusy(false); }, 300);
-  }
-  function answerKey(k: string) {
-    if (k === "kargo") push({ role: "bot", text: `Siparişleriniz 1-2 iş günü içinde kargoya verilir. ${tl(freeShippingLimit)} ve üzeri alışverişte kargo ÜCRETSİZ; altında ${tl(shippingFee)} kargo ücreti.` });
-    else if (k === "odeme") push({ role: "bot", text: "Kart ile güvenli ödeme (3D Secure) ve tüm kartlara vade farksız taksit imkânı sunuyoruz." });
-    else if (k === "garanti") push({ role: "bot", text: "Ürünler orijinal ve faturalıdır. 14 gün içinde koşulsuz iade; garanti arızaları yetkili servisle çözülür." });
-    else if (k === "adres") push({ role: "bot", text: `Adresimiz: ${address}\nTelefon: ${phone}` , whatsapp: true });
-    else if (k === "iletisim") push({ role: "bot", text: `Yetkili ekibimize ulaşın:\n📞 ${phone}\n✉️ ${email}`, whatsapp: true });
   }
 
   return (
