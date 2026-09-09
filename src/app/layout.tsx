@@ -5,6 +5,7 @@ import { CartProvider } from "@/components/cart/CartProvider";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { ChatWidget } from "@/components/ChatWidget";
 import { getSettings } from "@/lib/settings";
 import { toNumber } from "@/lib/utils";
 import { SITE_URL, SITE_NAME, LEGAL_NAME } from "@/lib/seo";
@@ -96,6 +97,14 @@ export default async function RootLayout({
           <main className="min-h-[60vh] flex-1">{children}</main>
           <Footer />
           <CartDrawer freeShippingLimit={toNumber(settings.freeShippingLimit)} />
+          <ChatWidget
+            whatsapp={settings.whatsapp}
+            phone={settings.phone}
+            email={settings.email}
+            address={settings.address}
+            freeShippingLimit={toNumber(settings.freeShippingLimit)}
+            shippingFee={toNumber(settings.shippingFee)}
+          />
         </CartProvider>
       </body>
     </html>
