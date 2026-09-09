@@ -126,10 +126,10 @@ export function ChatWidget({
         <button
           onClick={() => setOpen(true)}
           className="fixed bottom-5 right-5 z-[60] flex items-center gap-2 rounded-full bg-orange-500 px-4 py-3.5 font-semibold text-white shadow-xl transition hover:bg-orange-600"
-          aria-label="Yardım / Sohbet"
+          aria-label="SÖZTEK Asistan"
         >
           <MessageCircle size={22} />
-          <span className="hidden sm:inline">Yardım</span>
+          <span className="hidden sm:inline">SÖZTEK</span>
         </button>
       )}
 
@@ -140,8 +140,8 @@ export function ChatWidget({
           <div className="flex items-center gap-3 rounded-t-2xl bg-green-900 px-4 py-3 text-white">
             <span className="grid h-9 w-9 place-items-center rounded-full bg-orange-500"><Bot size={18} /></span>
             <div className="flex-1">
-              <p className="text-sm font-bold leading-tight">SÖZTEK Yardım</p>
-              <p className="text-[11px] text-green-200">Genellikle hemen yanıtlar</p>
+              <p className="text-sm font-bold leading-tight">SÖZTEK</p>
+              <p className="text-[11px] text-green-200">Canlı Asistan · genellikle hemen yanıtlar</p>
             </div>
             <button onClick={() => setOpen(false)} className="rounded-full p-1.5 hover:bg-white/10" aria-label="Kapat"><X size={20} /></button>
           </div>
