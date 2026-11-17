@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
+import { cachedCatalog } from "@/lib/cached";
 import { toProductDTO } from "@/lib/serialize";
 import { ProductCard } from "@/components/ProductCard";
 import { CategoryIcon } from "@/components/CategoryIcon";
@@ -13,7 +14,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const category = await prisma.category.findUnique({ where: { slug } });
+  const category = await cachedCatalog(["category-meta", slug], () => prisma.category.findUnique({ where: { slug } }));
   if (!category) return { title: "Kategori" };
   const desc = `${category.name} ürünleri en uygun fiyatlarla SÖZTEK Bilgisayar'da. Hızlı kargo, güvenli ödeme ve taksit imkânı.`;
   const path = `/kategori/${category.slug}`;
@@ -32,7 +33,7 @@ export default async function CategoryPage({
 }) {
   const { slug } = await params;
 
-  const category = await prisma.category.findUnique({
+  const category = await cachedCatalog(["category", slug], () => prisma.category.findUnique({
     where: { slug },
     include: {
       parent: { select: { name: true, slug: true } },
@@ -42,13 +43,13 @@ export default async function CategoryPage({
         include: { _count: { select: { products: true } } },
       },
     },
-  });
+  }));
 
   if (!category) notFound();
 
   const childIds = category.children.map((c) => c.id);
 
-  const [products, topLevel] = await Promise.all([
+  const [products, topLevel] = await cachedCatalog(["category-products", slug], () => Promise.all([
     // Bu kategori + alt kategorilerinin ürünleri
     prisma.product.findMany({
       where: { isActive: true, categoryId: { in: [category.id, ...childIds] } },
@@ -68,7 +69,7 @@ export default async function CategoryPage({
         },
       },
     }),
-  ]);
+  ]));
 
   const activeTop = category.parent?.slug ?? slug;
 

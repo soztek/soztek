@@ -1,8 +1,9 @@
 import { prisma } from "@/lib/prisma";
+import { cachedCatalog } from "@/lib/cached";
 import { SearchBar } from "./SearchBar";
 
 export async function SearchSection() {
-  const [brandsRaw, categories] = await Promise.all([
+  const [brandsRaw, categories] = await cachedCatalog(["search-section"], () => Promise.all([
     prisma.product.findMany({
       where: { isActive: true, brand: { not: null } },
       select: { brand: true },
@@ -14,7 +15,7 @@ export async function SearchSection() {
       orderBy: { order: "asc" },
       select: { name: true, slug: true },
     }),
-  ]);
+  ]));
   const brands = brandsRaw.map((b) => b.brand).filter((b): b is string => Boolean(b));
 
   return (

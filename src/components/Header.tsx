@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { MessageCircle, User, Truck, ShieldCheck, Headset, ChevronDown } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { cachedCatalog } from "@/lib/cached";
 import { getSettings } from "@/lib/settings";
 import { getCurrentUser } from "@/lib/user-auth";
 import { CartButton } from "./cart/CartButton";
@@ -12,20 +13,22 @@ import { HeaderSearch } from "./HeaderSearch";
 export async function Header() {
   const [settings, categories, user] = await Promise.all([
     getSettings(),
-    prisma.category.findMany({
-      where: { isActive: true, parentId: null },
-      orderBy: { order: "asc" },
-      select: {
-        name: true,
-        slug: true,
-        emoji: true,
-        children: {
-          where: { isActive: true },
-          orderBy: { order: "asc" },
-          select: { name: true, slug: true },
+    cachedCatalog(["nav-categories"], () =>
+      prisma.category.findMany({
+        where: { isActive: true, parentId: null },
+        orderBy: { order: "asc" },
+        select: {
+          name: true,
+          slug: true,
+          emoji: true,
+          children: {
+            where: { isActive: true },
+            orderBy: { order: "asc" },
+            select: { name: true, slug: true },
+          },
         },
-      },
-    }),
+      })
+    ),
     getCurrentUser(),
   ]);
 

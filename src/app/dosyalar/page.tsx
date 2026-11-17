@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { FileDown, ExternalLink, Download, HardDriveDownload } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { cachedCatalog } from "@/lib/cached";
 import { abs } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
@@ -22,10 +23,12 @@ function humanSize(b: number | null) {
 }
 
 export default async function DownloadsPage() {
-  const files = await prisma.downloadFile.findMany({
-    where: { isActive: true },
-    orderBy: [{ order: "asc" }, { createdAt: "desc" }],
-  });
+  const files = await cachedCatalog(["downloads"], () =>
+    prisma.downloadFile.findMany({
+      where: { isActive: true },
+      orderBy: [{ order: "asc" }, { createdAt: "desc" }],
+    })
+  );
 
   // Kategoriye göre grupla
   const groups = new Map<string, typeof files>();

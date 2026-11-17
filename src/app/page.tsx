@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, Truck, ShieldCheck, CreditCard, Headset, Zap } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { cachedCatalog } from "@/lib/cached";
 import { getSettings } from "@/lib/settings";
 import { toProductDTO } from "@/lib/serialize";
 import { ProductCard } from "@/components/ProductCard";
@@ -8,8 +9,9 @@ import { CategoryIcon } from "@/components/CategoryIcon";
 import { Reviews } from "@/components/Reviews";
 
 export default async function HomePage() {
-  const [settings, categories, discounted, featured, brands] = await Promise.all([
+  const [settings, [categories, discounted, featured, brands]] = await Promise.all([
     getSettings(),
+    cachedCatalog(["home"], () => Promise.all([
     prisma.category.findMany({
       where: { isActive: true, parentId: null },
       orderBy: { order: "asc" },
@@ -36,6 +38,7 @@ export default async function HomePage() {
       distinct: ["brand"],
       take: 16,
     }),
+    ])),
   ]);
 
   const brandNames = brands.map((b) => b.brand).filter(Boolean) as string[];

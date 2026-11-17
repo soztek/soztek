@@ -1,15 +1,16 @@
 import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
+import { cachedCatalog } from "@/lib/cached";
 import { SITE_URL } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [products, categories] = await Promise.all([
+  const [products, categories] = await cachedCatalog(["sitemap"], () => Promise.all([
     prisma.product.findMany({ where: { isActive: true }, select: { slug: true, updatedAt: true } }),
     prisma.category.findMany({ where: { isActive: true }, select: { slug: true } }),
-  ]);
+  ]));
 
   const staticPaths: { path: string; priority: number; freq: MetadataRoute.Sitemap[number]["changeFrequency"] }[] = [
     { path: "", priority: 1, freq: "daily" },
@@ -33,7 +34,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
     ...products.map((p) => ({
       url: `${SITE_URL}/urun/${p.slug}`,
-      lastModified: p.updatedAt,
+      lastModified: new Date(p.updatedAt),
       changeFrequency: "weekly" as const,
       priority: 0.6,
     })),
